@@ -1,16 +1,17 @@
 ﻿using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 
 namespace Oraculo
 {
     class Program
     {
-        private const string RedisConnectionString = "localhost";
-        //private const string RedisConnectionString = "40.77.30.246";
+        //private const string RedisConnectionString = "127.0.0.1";
+        private const string RedisConnectionString = "40.122.106.36";
         private static ConnectionMultiplexer connection = ConnectionMultiplexer.Connect(RedisConnectionString);
         private static IDatabase db = connection.GetDatabase();
 
-        private const string ChatChannel = "Perguntas";
+        private const string ChatChannel = "perguntas";
         private static readonly string userName = "HanSolo";
 
         static void Main(string[] args)
@@ -47,7 +48,28 @@ namespace Oraculo
             var arrPergunta = message.Split(' ');
 
             pergunta = arrPergunta[0].Replace(":", "");
-            Console.WriteLine(message);
+
+            if (arrPergunta.Length > 0)
+            {
+
+                var perguntaTratada = arrPergunta[3].Replace("?", "").Trim();
+                var arrConta = perguntaTratada.Split('+');
+                var resposta = Convert.ToInt32(arrConta[0]) + Convert.ToInt32(arrConta[1]);
+                //Random rnd = new Random();
+
+                //List<string> respostas = new List<string>() {
+                //     "00000041",
+                //     "0000424E",
+                //     "00004244",
+                //     "00004D53" };
+
+                //var resposta = respostas[rnd.Next(0, respostas.Count)];
+
+                db.HashSet(pergunta, new HashEntry[] { new HashEntry(userName, resposta) });
+
+                Console.WriteLine($"Pergunta: {message}");
+                Console.WriteLine($"Resposta: {resposta}");
+            }
 
             Console.CursorTop = initialCursorTop + 1;
             Console.CursorLeft = initialCursorLeft;
